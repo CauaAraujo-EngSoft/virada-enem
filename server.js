@@ -53,13 +53,19 @@ app.post('/api/generate-qr', async (req, res) => {
 // Create a fake PIX charge for local testing
 app.post('/api/create-charge', async (req, res) => {
   const { email, plan, amount } = req.body;
-  if (!email) return res.status(400).json({ error: 'email required' });
+  console.log('POST /api/create-charge:', { email, plan, amount });
+  
+  if (!email) {
+    console.log('ERROR: email required');
+    return res.status(400).json({ error: 'email required' });
+  }
 
   const payments = readPayments();
   const chargeId = `ch_${Date.now()}`;
-  // For dev: use simple copia-e-cola as the QR payload (valid for copy/paste)
-  // In production, replace with PSP-generated EMV QR Code
-  const copiaecola = `pix://${chargeId}`;
+  // Real PIX key (chave aleatória format - UUID)
+  const pixKey = '6847eebc-df1c-4184-ae17-7b274908ae64';
+  // Simple PIX copy-paste text (for development testing)
+  const copiaecola = `${pixKey}`;
 
   payments[chargeId] = {
     id: chargeId,
@@ -67,12 +73,14 @@ app.post('/api/create-charge', async (req, res) => {
     plan: plan || 'default',
     amount: amount || 0,
     status: 'pending',
+    pixKey,
     copiaecola,
     createdAt: Date.now(),
   };
   writePayments(payments);
+  console.log('✓ Charge created:', chargeId, 'PIX Key:', pixKey);
 
-  return res.json({ chargeId, copiaecola });
+  return res.json({ chargeId, copiaecola, pixKey, amount });
 });
 
 // Check payment status by chargeId or email

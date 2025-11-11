@@ -20,6 +20,15 @@ const SparklesIcon = ({ className = "w-6 h-6" }) => (
 );
 
 
+// --- Helper: Normalizar texto (remover acentos e converter para minúscula) ---
+const normalizeText = (text: string): string => {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacríticos
+    .trim();
+};
+
 // --- Tipos de Dados ---
 type User = {
   name: string;
@@ -296,12 +305,14 @@ const InitialQuizScreen = ({ onComplete }) => {
 const SubscriptionScreen = ({ onSubscribed }) => {
     const [showPixModal, setShowPixModal] = useState(false);
     const [charge, setCharge] = useState<any | null>(null);
-    const [qrImage, setQrImage] = useState<string | null>(null);
     const [isChecking, setIsChecking] = useState(false);
     const [error, setError] = useState('');
+    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationError, setVerificationError] = useState('');
     const pollRef = useRef<number | null>(null);
 
     const BACKEND = 'http://localhost:4000';
+    const RECEIVER_NAME = 'caua'; // Código correto (normalizado)
 
     const createCharge = async (plan, price) => {
         try {
@@ -319,21 +330,6 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             if (data.error) throw new Error(data.error);
             setCharge(data);
             setShowPixModal(true);
-
-            // Generate QR code image via server endpoint
-            try {
-                const qrRes = await fetch(`${BACKEND}/api/generate-qr`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: data.copiaecola }),
-                });
-                const qrData = await qrRes.json();
-                if (qrData.qrCodeImage) {
-                    setQrImage(qrData.qrCodeImage);
-                }
-            } catch (qrErr) {
-                console.warn('QR generation failed, will show fallback', qrErr);
-            }
 
             // start polling status automatically
             startPolling(data.chargeId);
@@ -380,7 +376,43 @@ const SubscriptionScreen = ({ onSubscribed }) => {
         alert('Copiado!');
     };
 
-    // simulatePayment removed for production-like flow
+    const handleVerifyCode = async () => {
+        setVerificationError('');
+        const normalizedInput = normalizeText(verificationCode);
+        
+        if (normalizedInput !== RECEIVER_NAME) {
+            setVerificationError('Código incorreto. Tente novamente.');
+            setVerificationCode('');
+            return;
+        }
+
+        // Código correto - marcar pagamento como pago no servidor
+        try {
+            const res = await fetch(`${BACKEND}/api/simulate-webhook`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chargeId: charge.chargeId }),
+            });
+            
+            if (res.ok) {
+                // Confirmar assinatura
+                const email = localStorage.getItem('lastUser') || '';
+                await fetch(`${BACKEND}/api/confirm-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                
+                stopPolling();
+                setShowPixModal(false);
+                setVerificationCode('');
+                onSubscribed();
+            }
+        } catch (err) {
+            console.error(err);
+            setVerificationError('Erro ao confirmar pagamento. Tente novamente.');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-900 text-white p-6 flex flex-col items-center">
@@ -416,32 +448,51 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             {showPixModal && charge && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
                     <div className="bg-slate-800 p-8 rounded-xl shadow-2xl text-center w-full max-w-sm">
-                        <h2 className="text-2xl font-bold mb-4 text-cyan-400">Pagamento via PIX</h2>
-                        <p className="text-slate-300 mb-4">Escaneie o QR code com seu app do banco ou use o copia-e-cola abaixo.</p>
-
-                        {/* QR Code image (generated locally via server) */}
-                        {qrImage ? (
-                            <div className="flex justify-center mb-4">
-                                <img
-                                    src={qrImage}
-                                    alt="QR code PIX"
-                                    className="w-64 h-64 bg-white p-2 rounded border-2 border-cyan-400"
-                                />
-                            </div>
-                        ) : (
-                            <div className="flex justify-center mb-4 w-64 h-64 bg-slate-700 rounded flex items-center justify-center text-slate-400">
-                                <p>Gerando QR...</p>
-                            </div>
-                        )}
-
-                        <div className="bg-slate-700 p-3 rounded-lg mb-4">
-                            <p className="text-sm break-words font-mono">{charge.copiaecola}</p>
+                        <h2 className="text-2xl font-bold mb-4 text-cyan-400">Pagamento PIX</h2>
+                        
+                        {/* Valor */}
+                        <div className="bg-slate-700 p-4 rounded-lg mb-6">
+                            <p className="text-slate-400 text-sm">Valor a pagar:</p>
+                            <p className="text-3xl font-bold text-cyan-400">R$ {charge.amount?.toFixed(2) || '0.00'}</p>
                         </div>
 
+                        {/* Chave PIX */}
+                        <div className="bg-slate-700 p-4 rounded-lg mb-6">
+                            <p className="text-slate-400 text-sm mb-2">Chave PIX (aleatória):</p>
+                            <p className="text-sm break-words font-mono bg-slate-900 p-2 rounded">{charge.copiaecola}</p>
+                        </div>
+
+                        {/* Instruções */}
+                        <p className="text-slate-300 text-sm mb-6">
+                            📱 Abra seu app bancário, vá para PIX e escolha "Transferência PIX". Cole a chave acima e confirme o pagamento de R$ {charge.amount?.toFixed(2) || '0.00'}.
+                        </p>
+
+                        {/* Botão Copiar */}
+                        <button onClick={() => copyToClipboard(charge.copiaecola)} className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg text-sm mb-4">Copiar Chave PIX</button>
+
+                        {/* Campo de verificação - Digitar código */}
+                        <div className="mb-4">
+                            <p className="text-slate-400 text-xs mb-2">Após realizar o PIX, digite o nome do recebedor para confirmar:</p>
+                            <input
+                                type="text"
+                                placeholder="Digitar nome..."
+                                value={verificationCode}
+                                onChange={(e) => {
+                                    setVerificationCode(e.target.value);
+                                    setVerificationError('');
+                                }}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') handleVerifyCode();
+                                }}
+                                className="w-full bg-slate-700 text-white p-2 rounded-lg mb-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            />
+                            {verificationError && <p className="text-red-400 text-xs">{verificationError}</p>}
+                        </div>
+
+                        {/* Botões */}
                         <div className="flex gap-3">
-                            <button onClick={() => copyToClipboard(charge.copiaecola)} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Copiar</button>
-                            <button onClick={() => checkStatus(charge.chargeId)} className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-4 rounded-lg">Verificar</button>
-                            <button onClick={() => { stopPolling(); setShowPixModal(false); setQrImage(null); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Cancelar</button>
+                            <button onClick={handleVerifyCode} className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-2 px-4 rounded-lg text-sm">Confirmar</button>
+                            <button onClick={() => { stopPolling(); setShowPixModal(false); setVerificationCode(''); setVerificationError(''); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Cancelar</button>
                         </div>
                     </div>
                 </div>
