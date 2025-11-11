@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
+import QRCode from 'qrcode';
 
 dotenv.config();
 
@@ -34,6 +35,21 @@ const writePayments = (obj) => fs.writeFileSync(PAYMENTS_FILE, JSON.stringify(ob
 const readUsersServer = () => JSON.parse(fs.readFileSync(USERS_FILE, 'utf8') || '{}');
 const writeUsersServer = (obj) => fs.writeFileSync(USERS_FILE, JSON.stringify(obj, null, 2));
 
+// Endpoint to generate QR code as data URL (base64 image)
+app.post('/api/generate-qr', async (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: 'text required' });
+
+  try {
+    // Generate QR code as data URL (PNG base64)
+    const dataUrl = await QRCode.toDataURL(text, { width: 300 });
+    return res.json({ qrCodeImage: dataUrl });
+  } catch (err) {
+    console.error('Error generating QR:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // Create a fake PIX charge for local testing
 app.post('/api/create-charge', async (req, res) => {
   const { email, plan, amount } = req.body;
@@ -41,7 +57,8 @@ app.post('/api/create-charge', async (req, res) => {
 
   const payments = readPayments();
   const chargeId = `ch_${Date.now()}`;
-  const fakeQrcode = `00020101021226800014br.gov.bcb.pix0114${process.env.SERVER_API_KEY?.slice(0,6) || 'FAKE'}5204000053039865405${(amount||0).toFixed(2)}5802BR5925Virada ENEM6009Sao Paulo6108054090006304ABCD`;
+  // For dev: use simple copia-e-cola as the QR payload (valid for copy/paste)
+  // In production, replace with PSP-generated EMV QR Code
   const copiaecola = `pix://${chargeId}`;
 
   payments[chargeId] = {
@@ -50,13 +67,12 @@ app.post('/api/create-charge', async (req, res) => {
     plan: plan || 'default',
     amount: amount || 0,
     status: 'pending',
-    qrcode: fakeQrcode,
     copiaecola,
     createdAt: Date.now(),
   };
   writePayments(payments);
 
-  return res.json({ chargeId, qrcode: fakeQrcode, copiaecola });
+  return res.json({ chargeId, copiaecola });
 });
 
 // Check payment status by chargeId or email

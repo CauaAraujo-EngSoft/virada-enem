@@ -296,6 +296,7 @@ const InitialQuizScreen = ({ onComplete }) => {
 const SubscriptionScreen = ({ onSubscribed }) => {
     const [showPixModal, setShowPixModal] = useState(false);
     const [charge, setCharge] = useState<any | null>(null);
+    const [qrImage, setQrImage] = useState<string | null>(null);
     const [isChecking, setIsChecking] = useState(false);
     const [error, setError] = useState('');
     const pollRef = useRef<number | null>(null);
@@ -318,6 +319,22 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             if (data.error) throw new Error(data.error);
             setCharge(data);
             setShowPixModal(true);
+
+            // Generate QR code image via server endpoint
+            try {
+                const qrRes = await fetch(`${BACKEND}/api/generate-qr`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: data.copiaecola }),
+                });
+                const qrData = await qrRes.json();
+                if (qrData.qrCodeImage) {
+                    setQrImage(qrData.qrCodeImage);
+                }
+            } catch (qrErr) {
+                console.warn('QR generation failed, will show fallback', qrErr);
+            }
+
             // start polling status automatically
             startPolling(data.chargeId);
         } catch (err) {
@@ -402,31 +419,30 @@ const SubscriptionScreen = ({ onSubscribed }) => {
                         <h2 className="text-2xl font-bold mb-4 text-cyan-400">Pagamento via PIX</h2>
                         <p className="text-slate-300 mb-4">Escaneie o QR code com seu app do banco ou use o copia-e-cola abaixo.</p>
 
-                                {/* QR Code image (generated via Google Charts for dev) */}
-                                <div className="flex justify-center mb-4">
-                                    <img
-                                        src={`https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${encodeURIComponent(charge.qrcode || charge.copiaecola)}`}
-                                        alt="QR code PIX"
-                                        className="w-64 h-64 bg-white p-2 rounded"
-                                    />
-                                </div>
+                        {/* QR Code image (generated locally via server) */}
+                        {qrImage ? (
+                            <div className="flex justify-center mb-4">
+                                <img
+                                    src={qrImage}
+                                    alt="QR code PIX"
+                                    className="w-64 h-64 bg-white p-2 rounded border-2 border-cyan-400"
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex justify-center mb-4 w-64 h-64 bg-slate-700 rounded flex items-center justify-center text-slate-400">
+                                <p>Gerando QR...</p>
+                            </div>
+                        )}
 
-                                <div className="bg-slate-700 p-3 rounded-lg mb-4">
-                                    <p className="text-sm break-words">{charge.copiaecola}</p>
-                                </div>
+                        <div className="bg-slate-700 p-3 rounded-lg mb-4">
+                            <p className="text-sm break-words font-mono">{charge.copiaecola}</p>
+                        </div>
 
-                                {/* Mostrar o payload EMV (qrcode) para copiar/depuração, se existir */}
-                                {charge.qrcode && (
-                                    <div className="bg-slate-700 p-2 rounded mb-3">
-                                        <p className="text-xs font-mono break-words">{charge.qrcode}</p>
-                                    </div>
-                                )}
-
-                                <div className="flex gap-3">
-                                    <button onClick={() => copyToClipboard(charge.copiaecola)} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Copiar</button>
-                                    <button onClick={() => checkStatus(charge.chargeId)} className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-4 rounded-lg">Verificar</button>
-                                    <button onClick={() => { stopPolling(); setShowPixModal(false); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Cancelar</button>
-                                </div>
+                        <div className="flex gap-3">
+                            <button onClick={() => copyToClipboard(charge.copiaecola)} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Copiar</button>
+                            <button onClick={() => checkStatus(charge.chargeId)} className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-3 px-4 rounded-lg">Verificar</button>
+                            <button onClick={() => { stopPolling(); setShowPixModal(false); setQrImage(null); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg">Cancelar</button>
+                        </div>
                     </div>
                 </div>
             )}
