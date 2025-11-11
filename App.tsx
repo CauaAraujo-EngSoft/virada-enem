@@ -309,10 +309,24 @@ const SubscriptionScreen = ({ onSubscribed }) => {
     const [error, setError] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [verificationError, setVerificationError] = useState('');
+    const [codeCopyTime, setCodeCopyTime] = useState<number | null>(null);
+    const [canShowCodeInput, setCanShowCodeInput] = useState(false);
     const pollRef = useRef<number | null>(null);
+    const timerRef = useRef<number | null>(null);
 
     const BACKEND = 'http://localhost:4000';
     const RECEIVER_NAME = 'caua'; // Código correto (normalizado)
+
+    // Efeito para atualizar o contador visual a cada segundo
+    useEffect(() => {
+        if (!codeCopyTime || canShowCodeInput) return;
+
+        const updateInterval = window.setInterval(() => {
+            setCodeCopyTime(prev => prev); // Força re-render
+        }, 500);
+
+        return () => window.clearInterval(updateInterval);
+    }, [codeCopyTime, canShowCodeInput]);
 
     const createCharge = async (plan, price) => {
         try {
@@ -349,6 +363,11 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             window.clearInterval(pollRef.current);
             pollRef.current = null;
         }
+        // Limpar timer de 5 segundos também
+        if (timerRef.current) {
+            window.clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
     };
 
     const checkStatus = async (chargeId) => {
@@ -373,7 +392,20 @@ const SubscriptionScreen = ({ onSubscribed }) => {
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
+        // Registra o tempo de cópia e inicia contagem de 5 segundos
+        setCodeCopyTime(Date.now());
+        setCanShowCodeInput(false);
         alert('Copiado!');
+
+        // Limpar timer anterior se existir
+        if (timerRef.current) {
+            window.clearTimeout(timerRef.current);
+        }
+
+        // Ativar input após 5 segundos
+        timerRef.current = window.setTimeout(() => {
+            setCanShowCodeInput(true);
+        }, 5000);
     };
 
     const handleVerifyCode = async () => {
@@ -406,6 +438,8 @@ const SubscriptionScreen = ({ onSubscribed }) => {
                 stopPolling();
                 setShowPixModal(false);
                 setVerificationCode('');
+                setCanShowCodeInput(false);
+                setCodeCopyTime(null);
                 onSubscribed();
             }
         } catch (err) {
@@ -470,29 +504,41 @@ const SubscriptionScreen = ({ onSubscribed }) => {
                         {/* Botão Copiar */}
                         <button onClick={() => copyToClipboard(charge.copiaecola)} className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg text-sm mb-4">Copiar Chave PIX</button>
 
-                        {/* Campo de verificação - Digitar código */}
-                        <div className="mb-4">
-                            <p className="text-slate-400 text-xs mb-2">Após realizar o PIX, digite o nome do recebedor para confirmar:</p>
-                            <input
-                                type="text"
-                                placeholder="Digitar nome..."
-                                value={verificationCode}
-                                onChange={(e) => {
-                                    setVerificationCode(e.target.value);
-                                    setVerificationError('');
-                                }}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') handleVerifyCode();
-                                }}
-                                className="w-full bg-slate-700 text-white p-2 rounded-lg mb-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                            />
-                            {verificationError && <p className="text-red-400 text-xs">{verificationError}</p>}
-                        </div>
+                        {/* Contador de espera ou campo de verificação */}
+                        {!canShowCodeInput ? (
+                            <div className="mb-4 p-4 bg-slate-700 rounded-lg border border-slate-600">
+                                <p className="text-slate-300 text-sm">Aguardando confirmação de cópia da chave...</p>
+                                <div className="mt-2 text-center">
+                                    <div className="inline-block bg-cyan-500 text-slate-900 font-bold px-3 py-1 rounded-lg text-lg">
+                                        {codeCopyTime ? Math.max(0, 5 - Math.floor((Date.now() - codeCopyTime) / 1000)) : '5'}s
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="mb-4">
+                                <p className="text-slate-400 text-xs mb-2">✓ Chave copiada! Agora, após realizar o PIX, digite o nome do recebedor para confirmar:</p>
+                                <input
+                                    type="text"
+                                    placeholder="Digitar nome..."
+                                    value={verificationCode}
+                                    onChange={(e) => {
+                                        setVerificationCode(e.target.value);
+                                        setVerificationError('');
+                                    }}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') handleVerifyCode();
+                                    }}
+                                    className="w-full bg-slate-700 text-white p-2 rounded-lg mb-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                                    autoFocus
+                                />
+                                {verificationError && <p className="text-red-400 text-xs">{verificationError}</p>}
+                            </div>
+                        )}
 
                         {/* Botões */}
                         <div className="flex gap-3">
-                            <button onClick={handleVerifyCode} className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-bold py-2 px-4 rounded-lg text-sm">Confirmar</button>
-                            <button onClick={() => { stopPolling(); setShowPixModal(false); setVerificationCode(''); setVerificationError(''); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Cancelar</button>
+                            <button onClick={handleVerifyCode} disabled={!canShowCodeInput} className={`flex-1 font-bold py-2 px-4 rounded-lg text-sm transition ${ canShowCodeInput ? 'bg-cyan-500 hover:bg-cyan-600 text-slate-900' : 'bg-slate-600 text-slate-400 cursor-not-allowed'}`}>Confirmar</button>
+                            <button onClick={() => { stopPolling(); setShowPixModal(false); setVerificationCode(''); setVerificationError(''); setCanShowCodeInput(false); setCodeCopyTime(null); }} className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Cancelar</button>
                         </div>
                     </div>
                 </div>
