@@ -6,6 +6,7 @@ import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
 import QRCode from 'qrcode';
+import os from 'os';
 
 dotenv.config();
 
@@ -22,11 +23,11 @@ if (!process.env.SERVER_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.SERVER_API_KEY });
 
 // Simple file-based storage for dev/testing
-const DATA_DIR = path.join('/tmp', 'data');
+const DATA_DIR = path.join(os.tmpdir(), 'data');
 const PAYMENTS_FILE = path.join(DATA_DIR, 'payments.json');
 const USERS_FILE = path.join(DATA_DIR, 'users-server.json');
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(PAYMENTS_FILE)) fs.writeFileSync(PAYMENTS_FILE, JSON.stringify({}));
 if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify({}));
 
@@ -163,5 +164,21 @@ app.get('/', (req, res) => {
   return res.redirect('http://localhost:3000');
 });
 
-// ADICIONE ISSO:
+// api/index.js
+// ... (todo o resto do seu código fica igual) ...
+
+// Dev convenience: redirect root to the frontend dev server
+app.get('/', (req, res) => {
+  return res.redirect('http://localhost:3000');
+});
+
+// Se NÃO estiver rodando na Vercel (ou seja, localmente)
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    console.log(`Servidor local rodando em http://localhost:${port}`);
+  });
+}
+
+// Deixe esta linha para a Vercel usar
 export default app;
