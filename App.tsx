@@ -1027,7 +1027,7 @@ function App() {
         // Save lastUser so payment flow and other screens recognize the user immediately
         localStorage.setItem('lastUser', newUser.email);
         // After cadastro, ir direto para a tela de assinatura para que a mensagem/QR apareça na hora
-        setScreen('subscription');
+        setScreen('quiz');
   };
 
   const handleLogin = (formData) => {
