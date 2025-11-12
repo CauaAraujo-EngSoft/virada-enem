@@ -22,7 +22,7 @@ if (!process.env.SERVER_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.SERVER_API_KEY });
 
 // Simple file-based storage for dev/testing
-const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_DIR = path.join('/tmp', 'data');
 const PAYMENTS_FILE = path.join(DATA_DIR, 'payments.json');
 const USERS_FILE = path.join(DATA_DIR, 'users-server.json');
 
