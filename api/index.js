@@ -163,6 +163,5 @@ app.get('/', (req, res) => {
   return res.redirect('http://localhost:3000');
 });
 
-app.listen(port, () => {
-  console.log(`Server proxy listening on http://localhost:${port}`);
-});
+// ADICIONE ISSO:
+export default app;
