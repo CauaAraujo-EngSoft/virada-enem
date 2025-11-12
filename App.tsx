@@ -314,7 +314,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
     const pollRef = useRef<number | null>(null);
     const timerRef = useRef<number | null>(null);
 
-    const BACKEND = 'http://localhost:4000';
+
     const RECEIVER_NAME = 'caua'; // Código correto (normalizado)
 
     // Efeito para atualizar o contador visual a cada segundo
@@ -335,7 +335,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
                 setError('Faça login antes de assinar (entre com seu e-mail).');
                 return;
             }
-            const res = await fetch(`${BACKEND}/api/create-charge`, {
+            const res = await fetch('/api/create-charge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, plan, amount: price }),
@@ -373,13 +373,13 @@ const SubscriptionScreen = ({ onSubscribed }) => {
     const checkStatus = async (chargeId) => {
         try {
             setIsChecking(true);
-            const res = await fetch(`${BACKEND}/api/payment-status?chargeId=${chargeId}`);
+            const res = await fetch(`/api/payment-status?chargeId=${chargeId}`);
             const data = await res.json();
             if (data.paid) {
                 stopPolling();
                 // inform server and client
                 const email = localStorage.getItem('lastUser') || '';
-                await fetch(`${BACKEND}/api/confirm-subscription`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+                await fetch('/api/confirm-subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
                 setShowPixModal(false);
                 onSubscribed();
             }
@@ -420,7 +420,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
 
         // Código correto - marcar pagamento como pago no servidor
         try {
-            const res = await fetch(`${BACKEND}/api/simulate-webhook`, {
+            const res = await fetch('/api/simulate-webhook', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chargeId: charge.chargeId }),
@@ -429,7 +429,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             if (res.ok) {
                 // Confirmar assinatura
                 const email = localStorage.getItem('lastUser') || '';
-                await fetch(`${BACKEND}/api/confirm-subscription`, {
+                await fetch('/api/confirm-subscription', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
