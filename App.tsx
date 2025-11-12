@@ -335,7 +335,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
                 setError('Faça login antes de assinar (entre com seu e-mail).');
                 return;
             }
-            const res = await fetch('/api/create-charge', {
+            const res = await fetch(`${API_URL}/api/create-charge`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, plan, amount: price }),
@@ -373,13 +373,13 @@ const SubscriptionScreen = ({ onSubscribed }) => {
     const checkStatus = async (chargeId) => {
         try {
             setIsChecking(true);
-            const res = await fetch(`/api/payment-status?chargeId=${chargeId}`);
+            const res = await fetch(`${API_URL}/api/payment-status?chargeId=${chargeId}`);
             const data = await res.json();
             if (data.paid) {
                 stopPolling();
                 // inform server and client
                 const email = localStorage.getItem('lastUser') || '';
-                await fetch('/api/confirm-subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+                await fetch(`${API_URL}/api/confirm-subscription`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
                 setShowPixModal(false);
                 onSubscribed();
             }
@@ -420,7 +420,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
 
         // Código correto - marcar pagamento como pago no servidor
         try {
-            const res = await fetch('/api/simulate-webhook', {
+            const res = await fetch(`${API_URL}/api/simulate-webhook`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chargeId: charge.chargeId }),
@@ -429,7 +429,7 @@ const SubscriptionScreen = ({ onSubscribed }) => {
             if (res.ok) {
                 // Confirmar assinatura
                 const email = localStorage.getItem('lastUser') || '';
-                await fetch('/api/confirm-subscription', {
+                await fetch(`${API_URL}/api/confirm-subscription`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
@@ -771,7 +771,7 @@ const AIChatbot = ({ onClose }) => {
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/chat', {
+            const res = await fetch(`${API_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: userMessage.text }),
@@ -976,6 +976,7 @@ function App() {
   const [authError, setAuthError] = useState('');
   const [studySubject, setStudySubject] = useState('');
   const [isRegisterForm, setIsRegisterForm] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL || "";
 
   // Helper para centralizar a atualização do usuário, garantindo a persistência correta
   const updateUser = (updateFn: (user: User) => User) => {
