@@ -1,0 +1,211 @@
+{
+  "_note": "This file is for development testing only. Sensitive data removed before commit.",
+  "ch_example_1": {
+    "id": "ch_example_1",
+    "email": "example@email.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "qrcode": "[PLACEHOLDER_EMV_QR_CODE]",
+    "copiaecola": "pix://ch_example_1",
+    "createdAt": 1000000000000
+  },
+  "ch_1762901925435": {
+    "id": "ch_1762901925435",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "15d",
+    "amount": 29.9,
+    "status": "pending",
+    "qrcode": "00020101021226800014br.gov.bcb.pix0114AIzaSy520400005303986540529.905802BR5925Virada ENEM6009Sao Paulo6108054090006304ABCD",
+    "copiaecola": "pix://ch_1762901925435",
+    "createdAt": 1762901925435
+  },
+  "ch_1762901929428": {
+    "id": "ch_1762901929428",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "15d",
+    "amount": 29.9,
+    "status": "pending",
+    "qrcode": "00020101021226800014br.gov.bcb.pix0114AIzaSy520400005303986540529.905802BR5925Virada ENEM6009Sao Paulo6108054090006304ABCD",
+    "copiaecola": "pix://ch_1762901929428",
+    "createdAt": 1762901929429
+  },
+  "ch_1762902047839": {
+    "id": "ch_1762902047839",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "qrcode": "00020101021226800014br.gov.bcb.pix0114AIzaSy520400005303986540519.905802BR5925Virada ENEM6009Sao Paulo6108054090006304ABCD",
+    "copiaecola": "pix://ch_1762902047839",
+    "createdAt": 1762902047839
+  },
+  "ch_1762902241517": {
+    "id": "ch_1762902241517",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "pix://ch_1762902241517",
+    "createdAt": 1762902241517
+  },
+  "ch_1762902366819": {
+    "id": "ch_1762902366819",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "contact@viradenem.com",
+    "createdAt": 1762902366819
+  },
+  "ch_1762902525083": {
+    "id": "ch_1762902525083",
+    "email": "cauaaraujojurassic03@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "contact@viradenem.com",
+    "createdAt": 1762902525083
+  },
+  "ch_1762902551401": {
+    "id": "ch_1762902551401",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "contact@viradenem.com",
+    "createdAt": 1762902551401
+  },
+  "ch_1762902815941": {
+    "id": "ch_1762902815941",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "contact@viradenem.com",
+    "createdAt": 1762902815941
+  },
+  "ch_1762903051531": {
+    "id": "ch_1762903051531",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "copiaecola": "contact@viradenem.com",
+    "createdAt": 1762903051531
+  },
+  "ch_1762903415085": {
+    "id": "ch_1762903415085",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762903415085
+  },
+  "ch_1762904642607": {
+    "id": "ch_1762904642607",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "15d",
+    "amount": 29.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904642607
+  },
+  "ch_1762904646252": {
+    "id": "ch_1762904646252",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904646252
+  },
+  "ch_1762904706710": {
+    "id": "ch_1762904706710",
+    "email": "cauaaraujojurassic555@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "paid",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904706710,
+    "paidAt": 1762904708344
+  },
+  "ch_1762904814121": {
+    "id": "ch_1762904814121",
+    "email": "cauaaraujojurassic03@gmail.com",
+    "plan": "15d",
+    "amount": 29.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904814121
+  },
+  "ch_1762904946998": {
+    "id": "ch_1762904946998",
+    "email": "cauaaraujojurassic03@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904946998
+  },
+  "ch_1762904953672": {
+    "id": "ch_1762904953672",
+    "email": "cauaaraujojurassic03@gmail.com",
+    "plan": "15d",
+    "amount": 29.9,
+    "status": "paid",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762904953672,
+    "paidAt": 1762904965618
+  },
+  "ch_1762905087692": {
+    "id": "ch_1762905087692",
+    "email": "cauaaraujojurassic5555@gmail.com",
+    "plan": "30d",
+    "amount": 49.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762905087692
+  },
+  "ch_1762905188230": {
+    "id": "ch_1762905188230",
+    "email": "cauaaraujojurassic5555@gmail.com",
+    "plan": "30d",
+    "amount": 49.9,
+    "status": "paid",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762905188230,
+    "paidAt": 1762905193619
+  },
+  "ch_1762905486564": {
+    "id": "ch_1762905486564",
+    "email": "cauaaraujojurassic56y56y456y@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "pending",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762905486564
+  },
+  "ch_1762909640513": {
+    "id": "ch_1762909640513",
+    "email": "cauaaraujojurassic56y56y456y@gmail.com",
+    "plan": "7d",
+    "amount": 19.9,
+    "status": "paid",
+    "pixKey": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "copiaecola": "6847eebc-df1c-4184-ae17-7b274908ae64",
+    "createdAt": 1762909640513,
+    "paidAt": 1762909653708
+  }
+}
